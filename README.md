@@ -1,4 +1,4 @@
-composer install
-php artisan migrate
-composer du -o
-php artisan db:seed
+<p>composer install</p>
+<p>php artisan migrate</p>
+<p>composer du -o</p>
+<p>php artisan db:seed</p>
