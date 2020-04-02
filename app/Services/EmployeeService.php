@@ -11,6 +11,7 @@ namespace App\Services;
 
 use App\Employee;
 use App\Http\Requests\Employee\ListEmployeeRequest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class EmployeeService
@@ -36,13 +37,13 @@ class EmployeeService
         }
 
         if ($request->has('country_name')) {
-            $employee->whereHas('country', function ($query) use ($request) {
+            $employee->whereHas('country', function (Builder $query) use ($request) {
                 $query->whereName($request->get('country_name'));
             });
         }
 
         if ($request->has('city_name')) {
-            $employee->whereHas('city', function ($query) use ($request) {
+            $employee->whereHas('city', function (Builder $query) use ($request) {
                 $query->whereName($request->get('city_name'));
             });
         }

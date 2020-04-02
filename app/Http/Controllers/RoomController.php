@@ -15,7 +15,7 @@ class RoomController extends Controller
     public function index()
     {
         $rooms = Room::whereNull('department_id')->get();
-        return response()->json($rooms, 200);
+        return response()->json($rooms);
     }
 
     /**

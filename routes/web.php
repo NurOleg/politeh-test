@@ -21,7 +21,7 @@ Route::get('/departments', function () {
     return view('sections.departments');
 })->name('department.index');
 
-Route::get('employee/{id}', 'EmployeeController@showWeb')->name('employee.show');
+Route::get('employee/{employee}', 'EmployeeController@showWeb')->name('employee.show');
 Route::get('department/create', 'DepartmentController@createWeb')->name('department.create');
-Route::get('department/{id}', 'DepartmentController@showWeb')->name('department.show');
-Route::get('department/{id}/edit', 'DepartmentController@editWeb')->name('department.edit');
+Route::get('department/{department}', 'DepartmentController@showWeb')->name('department.show');
+Route::get('department/{department}/edit', 'DepartmentController@editWeb')->name('department.edit');

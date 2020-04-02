@@ -8,6 +8,7 @@ use App\Employee;
 use App\Http\Requests\Department\CreateDepartmentRequest;
 use App\Http\Requests\Department\UpdateDepartmentRequest;
 use App\Services\DepartmentService;
+use App\Services\DepartmentValidatorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,12 +22,19 @@ class DepartmentController extends Controller
     private $departmentService;
 
     /**
+     * @var
+     */
+    private $departmentValidatorService;
+
+    /**
      * DepartmentController constructor.
      * @param DepartmentService $departmentService
+     * @param DepartmentValidatorService $departmentValidatorService
      */
-    public function __construct(DepartmentService $departmentService)
+    public function __construct(DepartmentService $departmentService, DepartmentValidatorService $departmentValidatorService)
     {
         $this->departmentService = $departmentService;
+        $this->departmentValidatorService = $departmentValidatorService;
     }
 
     /**
@@ -37,7 +45,7 @@ class DepartmentController extends Controller
     public function index()
     {
         $departments = Department::all();
-        return response()->json($departments, 200);
+        return response()->json($departments);
     }
 
     /**
@@ -50,46 +58,43 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $department = Department::with(['city', 'employees', 'rooms'])->find($id);
-        return response()->json($department, 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param UpdateDepartmentRequest $request
-     * @param $id
+     * @param Department $department
      * @return JsonResponse
      */
-    public function update(UpdateDepartmentRequest $request, $id): JsonResponse
+    public function show(Department $department)
     {
-        $this->checkEmployees($request->get('employees'));
-
-        return $this->departmentService->update($request, $id);
+        $department->load(['city', 'employees', 'rooms']);
+        return response()->json($department);
     }
 
     /**
-     * @param $id
-     * @return View
+     * @param UpdateDepartmentRequest $request
+     * @param Department $department
+     * @return JsonResponse
      */
-    public function showWeb($id): View
+    public function update(UpdateDepartmentRequest $request, Department $department): JsonResponse
     {
-        return view('sections.department', ['department' => Department::find($id)]);
+        $this->departmentValidatorService->checkEmployeesFree($request->get('employees'));
+
+        return $this->departmentService->update($request, $department);
     }
 
     /**
-     * @param $id
+     * @param Department $department
      * @return View
      */
-    public function editWeb($id): View
+    public function showWeb(Department $department): View
     {
-        return view('sections.department_edit', ['department' => Department::find($id)]);
+        return view('sections.department', ['department' => $department]);
+    }
+
+    /**
+     * @param Department $department
+     * @return View
+     */
+    public function editWeb(Department $department): View
+    {
+        return view('sections.department_edit', ['department' => $department]);
     }
 
     /**
@@ -99,22 +104,5 @@ class DepartmentController extends Controller
     {
         $cities = City::all();
         return view('sections.department_create', ['cities' => $cities]);
-    }
-
-    /**
-     * @param array $employees
-     */
-    private function checkEmployees(array $employees = null)
-    {
-        if ($employees === null) {
-            return;
-        }
-
-        $departmentsIds = Employee::find($employees)->pluck('department_id')->toArray();
-        if (!empty(array_filter($departmentsIds, function ($a) {
-            return $a !== null;
-        }))) {
-            throw new UnprocessableEntityHttpException('All employees must be without department');
-        }
     }
 }

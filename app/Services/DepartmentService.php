@@ -9,13 +9,13 @@
 namespace App\Services;
 
 
-use App\City;
 use App\Department;
 use App\Employee;
 use App\Http\Requests\Department\CreateDepartmentRequest;
 use App\Http\Requests\Department\UpdateDepartmentRequest;
 use App\Room;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class DepartmentService
 {
@@ -24,10 +24,8 @@ class DepartmentService
      * @param $id
      * @return JsonResponse
      */
-    public function update(UpdateDepartmentRequest $request, $id): JsonResponse
+    public function update(UpdateDepartmentRequest $request, Department $department): JsonResponse
     {
-        $department = Department::find($id);
-
         if ($request->has('rooms_deleted')) {
             Room::whereIn('id', $request->get('rooms_deleted'))->update(['department_id' => null]);
         }
@@ -44,7 +42,7 @@ class DepartmentService
 
         $department->update($request->all());
 
-        return response()->json($department, 200);
+        return response()->json($department);
     }
 
     /**
@@ -65,6 +63,6 @@ class DepartmentService
             $department->employees()->saveMany($employees);
         }
 
-        return response()->json($department, 201);
+        return response()->json($department, Response::HTTP_CREATED);
     }
 }
