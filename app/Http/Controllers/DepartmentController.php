@@ -22,7 +22,7 @@ class DepartmentController extends Controller
     private $departmentService;
 
     /**
-     * @var
+     * @var DepartmentValidatorService
      */
     private $departmentValidatorService;
 
